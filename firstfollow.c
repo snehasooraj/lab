@@ -1,139 +1,149 @@
 
+
 #include <stdio.h>
+#include <string.h>
 #include <ctype.h>
 
+char prod[10][20];
 int n;
-char p[20][20], first[26][128], follow[26][128];
 
-int main()
-{
-    int i,j,k,a,b,x,y,c,change,nullable;
+void add(char set[], char c) {
+    int i;
+    for (i = 0; set[i] != '\0'; i++) {
+        if (set[i] == c)
+            return;
+    }
+    set[i] = c;
+    set[i + 1] = '\0';
+}
 
-    printf("Enter number of productions: ");
-    scanf("%d",&n);
+void FIRST(char c, char result[]) {
+    int i, j;
 
-    printf("Enter productions:\n");
-    for(i=0;i<n;i++)
-        scanf("%s",p[i]);
-
-    // FIRST
-    do {
-        change=0;
-        for(i=0;i<n;i++) {
-            a=p[i][0]-'A';
-            nullable=1;
-
-            for(j=2;p[i][j];j++) {
-                b=p[i][j];
-
-                if(b=='#') {
-                    if(!first[a]['#'])
-                        first[a]['#']=1,change=1;
-                    break;
-                }
-
-                if(isupper(b)) {
-                    x=b-'A';
-
-                    for(k=0;k<128;k++)
-                        if(first[x][k] && k!='#' && !first[a][k])
-                            first[a][k]=1,change=1;
-
-                    if(!first[x]['#']) {
-                        nullable=0;
-                        break;
-                    }
-                }
-                else {
-                    if(!first[a][b])
-                        first[a][b]=1,change=1;
-                    nullable=0;
-                    break;
-                }
-            }
-
-            if(nullable && !first[a]['#'])
-                first[a]['#']=1,change=1;
-        }
-    } while(change);
-
-    // FOLLOW
-    follow[p[0][0]-'A']['$']=1;
-
-    do {
-        change=0;
-
-        for(i=0;i<n;i++) {
-            a=p[i][0]-'A';
-
-            for(j=2;p[i][j];j++) {
-                b=p[i][j];
-
-                if(isupper(b)) {
-                    x=b-'A';
-                    nullable=1;
-
-                    for(k=j+1;p[i][k];k++) {
-                        if(isupper(p[i][k])) {
-                            y=p[i][k]-'A';
-
-                            for(c=0;c<128;c++)
-                                if(first[y][c] && c!='#' && !follow[x][c])
-                                    follow[x][c]=1,change=1;
-
-                            if(!first[y]['#']) {
-                                nullable=0;
-                                break;
-                            }
-                        }
-                        else {
-                            if(!follow[x][p[i][k]])
-                                follow[x][p[i][k]]=1,change=1;
-                            nullable=0;
-                            break;
-                        }
-                    }
-
-                    if(nullable)
-                        for(c=0;c<128;c++)
-                            if(follow[a][c] && !follow[x][c])
-                                follow[x][c]=1,change=1;
-                }
-            }
-        }
-    } while(change);
-
-    // OUTPUT
-    printf("\nFIRST:\n");
-
-    for(i=0;i<n;i++) {
-        a=p[i][0]-'A';
-
-        if(i==0 || p[i][0]!=p[i-1][0]) {
-            printf("FIRST(%c) = { ",p[i][0]);
-
-            for(j=0;j<128;j++)
-                if(first[a][j])
-                    printf("%c ",j);
-
-            printf("}\n");
-        }
+    if (!isupper(c)) {
+        add(result, c);
+        return;
     }
 
-    printf("\nFOLLOW:\n");
+    for (i = 0; i < n; i++) {
+        if (prod[i][0] == c) {
+            if (prod[i][2] == '#') {
+                add(result, '#');
+            } else {
+                j = 2;
+                while (prod[i][j] != '\0') {
+                    char temp[20] = "";
+                    FIRST(prod[i][j], temp);
 
-    for(i=0;i<n;i++) {
-        a=p[i][0]-'A';
+                    int k;
+                    int epsilon = 0;
 
-        if(i==0 || p[i][0]!=p[i-1][0]) {
-            printf("FOLLOW(%c) = { ",p[i][0]);
+                    for (k = 0; temp[k] != '\0'; k++) {
+                        if (temp[k] == '#')
+                            epsilon = 1;
+                        else
+                            add(result, temp[k]);
+                    }
 
-            for(j=0;j<128;j++)
-                if(follow[a][j])
-                    printf("%c ",j);
+                    if (!epsilon)
+                        break;
 
-            printf("}\n");
+                    j++;
+                }
+            }
         }
+    }
+}
+
+void FOLLOW(char c, char result[]) {
+    int i, j, k;
+
+    if (c == prod[0][0])
+        add(result, '$');
+
+    for (i = 0; i < n; i++) {
+        for (j = 2; prod[i][j] != '\0'; j++) {
+            if (prod[i][j] == c) {
+                if (prod[i][j + 1] != '\0') {
+                    char next = prod[i][j + 1];
+                    char temp[20] = "";
+
+                    FIRST(next, temp);
+
+                    int epsilon = 0;
+
+                    for (k = 0; temp[k] != '\0'; k++) {
+                        if (temp[k] == '#')
+                            epsilon = 1;
+                        else
+                            add(result, temp[k]);
+                    }
+
+                    if (epsilon) {
+                        char temp2[20] = "";
+
+                        if (prod[i][0] != c) {
+                            FOLLOW(prod[i][0], temp2);
+
+                            for (k = 0; temp2[k] != '\0'; k++)
+                                add(result, temp2[k]);
+                        }
+                    }
+                } else {
+                    if (prod[i][0] != c) {
+                        char temp[20] = "";
+
+                        FOLLOW(prod[i][0], temp);
+
+                        for (k = 0; temp[k] != '\0'; k++)
+                            add(result, temp[k]);
+                    }
+                }
+            }
+        }
+    }
+}
+
+int main() {
+    int i, j;
+    char temp[20];
+
+    printf("Enter number of productions: ");
+    scanf("%d", &n);
+
+    printf("Enter productions (use # for epsilon):\n");
+
+    for (i = 0; i < n; i++)
+        scanf("%s", prod[i]);
+
+    printf("\nFIRST sets:\n");
+
+    for (i = 0; i < n; i++) {
+        temp[0] = '\0';
+
+        FIRST(prod[i][0], temp);
+
+        printf("FIRST(%c) = {", prod[i][0]);
+
+        for (j = 0; temp[j] != '\0'; j++)
+            printf(" %c", temp[j]);
+
+        printf(" }\n");
+    }
+
+    printf("\nFOLLOW sets:\n");
+
+    for (i = 0; i < n; i++) {
+        temp[0] = '\0';
+
+        FOLLOW(prod[i][0], temp);
+
+        printf("FOLLOW(%c) = {", prod[i][0]);
+
+        for (j = 0; temp[j] != '\0'; j++)
+            printf(" %c", temp[j]);
+
+        printf(" }\n");
     }
 
     return 0;
