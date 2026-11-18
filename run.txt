@@ -1,0 +1,145 @@
+1. LEXICAL ANALYZER USING C
+
+Command:
+gcc lexical.c -o lexical
+./lexical
+
+Input:
+int a = 10;
+float b = 20;
+a + b;
+
+
+2. LEXICAL ANALYZER USING LEX
+
+Command:
+lex lexical.l
+gcc lex.yy.c -ll -o lexical
+./lexical
+
+Input:
+int a = 10;
+float b = 20;
+a + b;
+
+
+3. COUNT LINES, WORDS AND CHARACTERS
+
+Command:
+lex count.l
+gcc lex.yy.c -ll -o count
+./count
+
+Input:
+Hello world
+Compiler lab
+
+
+4. VALID IDENTIFIER USING LEX AND YACC
+
+Command:
+yacc -d id.y
+lex id.l
+gcc y.tab.c lex.yy.c -ll -ly -o id
+./id
+
+Input:
+abc123
+
+
+5. VOWELS AND CONSONANTS USING LEX
+
+Command:
+lex vowels.l
+gcc lex.yy.c -ll -o vowels
+./vowels
+
+Input:
+Hello World
+
+
+6. EPSILON CLOSURE OF NFA
+
+Command:
+gcc epsilon.c -o epsilon
+./epsilon
+
+Input:
+3
+0 1 0
+0 0 1
+0 0 0
+
+
+7. E-NFA TO NFA CONVERSION
+
+Command:
+gcc enfa.c -o enfa
+./enfa
+
+Input:
+3
+2
+0 1 0
+0 0 1
+0 0 0
+
+(Remaining transition matrices depend on the program prompts.)
+
+
+8. NFA TO DFA CONVERSION
+
+Command:
+gcc nfa.c -o nfa
+./nfa
+
+Input:
+Refer to the program's input prompts.
+
+
+9. FIRST AND FOLLOW
+
+Command:
+gcc firstfollow.c -o firstfollow
+./firstfollow
+
+Input:
+8
+E=TR
+R=+TR
+R=#
+T=FY
+Y=*FY
+Y=#
+F=(E)
+F=i
+
+
+10. RECURSIVE DESCENT PARSER
+
+Command:
+gcc recursive.c -o recursive
+./recursive
+
+Input:
+i+i*i
+
+
+11. SHIFT REDUCE PARSER
+
+Command:
+gcc shiftreduce.c -o shiftreduce
+./shiftreduce
+
+Input:
+i+i*i
+
+
+12. INTERMEDIATE CODE GENERATION
+
+Command:
+gcc intermediate.c -o intermediate
+./intermediate
+
+Input:
+a+b*c
